@@ -1,0 +1,208 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Locale {
+  en
+  zh
+}
+
+enum PublishStatus {
+  draft
+  published
+}
+
+enum AdminRole {
+  super_admin
+  editor
+}
+
+enum InquiryStatus {
+  new
+  read
+  archived
+}
+
+enum ProductCategory {
+  software
+  hardware
+}
+
+model AdminUser {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  passwordHash String         @map("password_hash")
+  name         String?
+  role         AdminRole      @default(editor)
+  isActive     Boolean        @default(true) @map("is_active")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  refreshTokens RefreshToken[]
+
+  @@map("admin_users")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  tokenHash String    @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model Post {
+  id              String        @id @default(uuid())
+  locale          Locale
+  slug            String
+  title           String
+  excerpt         String        @db.Text
+  body            Json
+  category        String
+  readMinutes     Int           @default(5) @map("read_minutes")
+  status          PublishStatus @default(draft)
+  publishedAt     DateTime?     @map("published_at")
+  seoTitle        String?       @map("seo_title")
+  seoDescription  String?       @map("seo_description") @db.Text
+  ogImage         String?       @map("og_image")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  @@unique([locale, slug])
+  @@index([status, locale, publishedAt])
+  @@map("posts")
+}
+
+model Solution {
+  id              String        @id @default(uuid())
+  locale          Locale
+  slug            String
+  name            String
+  tagline         String        @db.Text
+  intro           String        @db.Text
+  icon            String        @default("Boxes")
+  heroImage       String?       @map("hero_image")
+  capabilities    Json          @default("[]")
+  deliverables    Json          @default("[]")
+  protocols       Json          @default("[]")
+  certifications  Json          @default("[]")
+  workflow        Json          @default("[]")
+  resources       Json          @default("[]")
+  sortOrder       Int           @default(0) @map("sort_order")
+  status          PublishStatus @default(draft)
+  seoTitle        String?       @map("seo_title")
+  seoDescription  String?       @map("seo_description") @db.Text
+  ogImage         String?       @map("og_image")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  @@unique([locale, slug])
+  @@index([status, locale, sortOrder])
+  @@map("solutions")
+}
+
+model Product {
+  id              String          @id @default(uuid())
+  locale          Locale
+  slug            String
+  name            String
+  description     String          @db.Text
+  category        ProductCategory
+  linkPath        String?         @map("link_path")
+  sortOrder       Int             @default(0) @map("sort_order")
+  status          PublishStatus   @default(draft)
+  seoTitle        String?         @map("seo_title")
+  seoDescription  String?         @map("seo_description") @db.Text
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  @@unique([locale, slug])
+  @@index([status, locale, category, sortOrder])
+  @@map("products")
+}
+
+model DownloadGroup {
+  id        String         @id @default(uuid())
+  locale    Locale
+  name      String
+  sortOrder Int            @default(0) @map("sort_order")
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+  items     DownloadItem[]
+
+  @@index([locale, sortOrder])
+  @@map("download_groups")
+}
+
+model DownloadItem {
+  id        String        @id @default(uuid())
+  groupId   String        @map("group_id")
+  name      String
+  version   String?
+  fileUrl   String?       @map("file_url")
+  fileSize  String?       @map("file_size")
+  sortOrder Int           @default(0) @map("sort_order")
+  status    PublishStatus @default(draft)
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+  group     DownloadGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId, sortOrder])
+  @@map("download_items")
+}
+
+model Media {
+  id        String   @id @default(uuid())
+  filename  String
+  url       String
+  alt       String?
+  mimeType  String   @map("mime_type")
+  sizeBytes Int      @map("size_bytes")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("media")
+}
+
+model SiteSetting {
+  id        String   @id @default(uuid())
+  key       String
+  locale    Locale?
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([key, locale])
+  @@map("site_settings")
+}
+
+model Inquiry {
+  id        String        @id @default(uuid())
+  name      String
+  company   String?
+  email     String
+  whatsapp  String?
+  country   String?
+  subject   String
+  message   String        @db.Text
+  status    InquiryStatus @default(new)
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  @@index([status, createdAt])
+  @@map("inquiries")
+}
+
+model Redirect {
+  id         String @id @default(uuid())
+  fromPath   String @unique @map("from_path")
+  toPath     String @map("to_path")
+  statusCode Int    @default(301) @map("status_code")
+
+  @@map("redirects")
+}
