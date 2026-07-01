@@ -4,6 +4,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { AppModule } from './app.module';
+import { PrismaExceptionFilter } from './common/prisma-exception.filter';
 
 const uploadDir = process.env.UPLOAD_DIR ?? join(process.cwd(), 'uploads');
 
@@ -14,6 +15,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
   app.useStaticAssets(uploadDir, { prefix: '/uploads/' });
+  app.useGlobalFilters(new PrismaExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

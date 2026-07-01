@@ -11,6 +11,10 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.2.5",
+    "@tiptap/extension-image": "^3.27.1",
+    "@tiptap/pm": "^3.27.1",
+    "@tiptap/react": "^3.27.1",
+    "@tiptap/starter-kit": "^3.27.1",
     "antd": "^6.4.5",
     "axios": "^1.18.1",
     "dayjs": "^1.11.21",

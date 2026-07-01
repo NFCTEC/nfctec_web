@@ -12,7 +12,10 @@ import {
 import dayjs from 'dayjs';
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { RichTextEditor } from '../../components/RichTextEditor';
+import { bodyToHtml } from '../../lib/postBody';
 import { api, type Post } from '../../lib/api';
+import { getApiErrorMessage } from '../../lib/errors';
 
 export function PostFormPage() {
   const { id } = useParams();
@@ -25,7 +28,7 @@ export function PostFormPage() {
       api.get<Post>(`/admin/posts/${id}`).then((r) => {
         form.setFieldsValue({
           ...r.data,
-          body: JSON.stringify(r.data.body, null, 2),
+          bodyHtml: bodyToHtml(r.data.body),
           publishedAt: r.data.publishedAt ? dayjs(r.data.publishedAt) : null,
         });
       });
@@ -33,13 +36,29 @@ export function PostFormPage() {
   }, [id, isNew, form]);
 
   const onFinish = async (values: Record<string, unknown>) => {
+    const html = String(values.bodyHtml ?? '').trim();
+    if (!html || html === '<p></p>') {
+      message.error('Please write the article body');
+      return;
+    }
+
     const payload = {
-      ...values,
-      body: JSON.parse(String(values.body || '[]')),
+      locale: values.locale,
+      status: values.status,
+      category: values.category,
+      readMinutes: values.readMinutes,
+      slug: values.slug,
+      title: values.title,
+      excerpt: values.excerpt,
+      body: html,
       publishedAt: values.publishedAt
         ? (values.publishedAt as dayjs.Dayjs).toISOString()
         : null,
+      seoTitle: values.seoTitle || undefined,
+      seoDescription: values.seoDescription || undefined,
+      ogImage: values.ogImage || undefined,
     };
+
     try {
       if (isNew) {
         await api.post('/admin/posts', payload);
@@ -49,14 +68,21 @@ export function PostFormPage() {
         message.success('Saved');
       }
       navigate('/posts');
-    } catch {
-      message.error('Save failed — check JSON body format');
+    } catch (err: unknown) {
+      message.error(
+        getApiErrorMessage(err, 'Save failed — check required fields and slug uniqueness'),
+      );
     }
   };
 
   return (
     <Card title={isNew ? 'New post' : 'Edit post'}>
-      <Form form={form} layout="vertical" onFinish={onFinish} initialValues={{ locale: 'en', status: 'draft', readMinutes: 5, body: '[]' }}>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={onFinish}
+        initialValues={{ locale: 'en', status: 'draft', readMinutes: 5, bodyHtml: '<p></p>' }}
+      >
         <Space style={{ width: '100%' }} size="large" wrap>
           <Form.Item name="locale" label="Locale" rules={[{ required: true }]} style={{ minWidth: 120 }}>
             <Select options={[{ value: 'en' }, { value: 'zh' }]} />
@@ -65,13 +91,13 @@ export function PostFormPage() {
             <Select options={[{ value: 'draft' }, { value: 'published' }]} />
           </Form.Item>
           <Form.Item name="category" label="Category" rules={[{ required: true }]} style={{ minWidth: 160 }}>
-            <Input />
+            <Input placeholder="e.g. Security, EMV, Hardware" />
           </Form.Item>
           <Form.Item name="readMinutes" label="Read minutes" rules={[{ required: true }]}>
             <InputNumber min={1} />
           </Form.Item>
         </Space>
-        <Form.Item name="slug" label="Slug" rules={[{ required: true }]}>
+        <Form.Item name="slug" label="Slug" rules={[{ required: true }]} extra="URL path, e.g. ntag424-dna-issuance-checklist">
           <Input />
         </Form.Item>
         <Form.Item name="title" label="Title" rules={[{ required: true }]}>
@@ -80,8 +106,13 @@ export function PostFormPage() {
         <Form.Item name="excerpt" label="Excerpt" rules={[{ required: true }]}>
           <Input.TextArea rows={3} />
         </Form.Item>
-        <Form.Item name="body" label="Body (JSON array)" rules={[{ required: true }]}>
-          <Input.TextArea rows={12} style={{ fontFamily: 'monospace' }} />
+        <Form.Item
+          name="bodyHtml"
+          label="Body"
+          rules={[{ required: true }]}
+          extra="Rich text — headings, lists and bold appear on the website as you see them here."
+        >
+          <RichTextEditor placeholder="Write your article…" />
         </Form.Item>
         <Form.Item name="publishedAt" label="Published at">
           <DatePicker showTime />
@@ -93,7 +124,7 @@ export function PostFormPage() {
           <Input.TextArea rows={2} />
         </Form.Item>
         <Form.Item name="ogImage" label="OG image URL">
-          <Input />
+          <Input placeholder="https://www.nfctec.com/og-default.jpg" />
         </Form.Item>
         <Space>
           <Button type="primary" htmlType="submit">

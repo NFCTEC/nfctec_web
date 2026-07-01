@@ -1,4 +1,4 @@
-import { IsEnum, IsInt, IsOptional, IsString, Min, MinLength } from 'class-validator';
+import { Allow, IsEnum, IsInt, IsOptional, IsString, Min, MinLength } from 'class-validator';
 import { Locale, PublishStatus } from '@prisma/client';
 
 export class CreateSolutionDto {
@@ -26,21 +26,27 @@ export class CreateSolutionDto {
   @IsOptional()
   heroImage?: string;
 
+  @Allow()
   @IsOptional()
   capabilities?: unknown;
 
+  @Allow()
   @IsOptional()
   deliverables?: unknown;
 
+  @Allow()
   @IsOptional()
   protocols?: unknown;
 
+  @Allow()
   @IsOptional()
   certifications?: unknown;
 
+  @Allow()
   @IsOptional()
   workflow?: unknown;
 
+  @Allow()
   @IsOptional()
   resources?: unknown;
 
@@ -94,21 +100,27 @@ export class UpdateSolutionDto {
   @IsOptional()
   heroImage?: string | null;
 
+  @Allow()
   @IsOptional()
   capabilities?: unknown;
 
+  @Allow()
   @IsOptional()
   deliverables?: unknown;
 
+  @Allow()
   @IsOptional()
   protocols?: unknown;
 
+  @Allow()
   @IsOptional()
   certifications?: unknown;
 
+  @Allow()
   @IsOptional()
   workflow?: unknown;
 
+  @Allow()
   @IsOptional()
   resources?: unknown;
 

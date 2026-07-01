@@ -67,6 +67,7 @@ export type Post = {
   body: unknown;
   category: string;
   readMinutes: number;
+  viewCount: number;
   status: 'draft' | 'published';
   publishedAt: string | null;
   seoTitle: string | null;
@@ -101,10 +102,40 @@ export type Product = {
   slug: string;
   name: string;
   description: string;
+  tagline: string | null;
+  intro: string | null;
   category: 'software' | 'hardware';
-  linkPath: string | null;
+  icon: string;
+  heroImage: string | null;
+  images: unknown;
+  features: unknown;
+  specs: unknown;
+  useCases: unknown;
+  highlights: unknown;
+  body: string;
+  hasDetailPage: boolean;
+  ctaUrl: string | null;
+  ctaLabel: string | null;
+  secondaryCtaUrl: string | null;
+  secondaryCtaLabel: string | null;
   sortOrder: number;
   status: 'draft' | 'published';
+  seoTitle: string | null;
+  seoDescription: string | null;
+  ogImage: string | null;
+};
+
+export type ModuleKey = 'products' | 'solutions' | 'blog' | 'downloads' | 'platform' | 'contact';
+
+export type ModuleDisplayConfig = {
+  enabled: boolean;
+  showInNav: boolean;
+  mode: 'all' | 'selected';
+  selectedIds: string[];
+};
+
+export type SiteDisplayConfig = {
+  modules: Record<ModuleKey, ModuleDisplayConfig>;
 };
 
 export type DownloadGroup = {
@@ -120,6 +151,7 @@ export type DownloadGroup = {
     fileSize: string | null;
     sortOrder: number;
     status: 'draft' | 'published';
+    downloadCount: number;
   }[];
 };
 

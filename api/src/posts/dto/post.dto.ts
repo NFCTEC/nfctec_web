@@ -1,4 +1,5 @@
 import {
+  Allow,
   IsEnum,
   IsInt,
   IsISO8601,
@@ -24,6 +25,7 @@ export class CreatePostDto {
   @IsString()
   excerpt: string;
 
+  @Allow()
   body: unknown;
 
   @IsString()
@@ -72,6 +74,7 @@ export class UpdatePostDto {
   @IsOptional()
   excerpt?: string;
 
+  @Allow()
   @IsOptional()
   body?: unknown;
 

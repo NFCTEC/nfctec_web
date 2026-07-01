@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { createHash } from 'crypto';
 import { Locale, Prisma, PublishStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
@@ -64,6 +65,50 @@ export class PostsService {
     });
     if (!post) throw new NotFoundException('Post not found');
     return post;
+  }
+
+  async recordView(
+    locale: Locale,
+    slug: string,
+    ctx: { viewerId?: string; ip?: string; userAgent?: string },
+  ) {
+    const post = await this.prisma.post.findFirst({
+      where: { locale, slug, status: PublishStatus.published },
+      select: { id: true, viewCount: true },
+    });
+    if (!post) throw new NotFoundException('Post not found');
+
+    const viewerKey = ctx.viewerId
+      ? ctx.viewerId
+      : createHash('sha256')
+          .update(`${ctx.ip ?? 'unknown'}|${ctx.userAgent ?? ''}`)
+          .digest('hex');
+
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const recent = await this.prisma.postView.findFirst({
+      where: {
+        postId: post.id,
+        viewerKey,
+        viewedAt: { gte: since },
+      },
+    });
+
+    if (recent) {
+      return { viewCount: post.viewCount, recorded: false };
+    }
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      await tx.postView.create({
+        data: { postId: post.id, viewerKey },
+      });
+      return tx.post.update({
+        where: { id: post.id },
+        data: { viewCount: { increment: 1 } },
+        select: { viewCount: true },
+      });
+    });
+
+    return { viewCount: updated.viewCount, recorded: true };
   }
 
   private async ensureExists(id: string) {

@@ -23,6 +23,7 @@ export function ProductsPage() {
         columns={[
           { title: 'Name', dataIndex: 'name' },
           { title: 'Category', dataIndex: 'category' },
+          { title: 'Detail', dataIndex: 'hasDetailPage', width: 70, render: (v: boolean) => (v ? 'Yes' : '—') },
           { title: 'Locale', dataIndex: 'locale', width: 80 },
           { title: 'Status', dataIndex: 'status', render: (s: string) => <Tag color={s === 'published' ? 'green' : 'default'}>{s}</Tag> },
           {

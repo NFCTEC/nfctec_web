@@ -68,6 +68,7 @@ model Post {
   body            Json
   category        String
   readMinutes     Int           @default(5) @map("read_minutes")
+  viewCount       Int           @default(0) @map("view_count")
   status          PublishStatus @default(draft)
   publishedAt     DateTime?     @map("published_at")
   seoTitle        String?       @map("seo_title")
@@ -75,10 +76,22 @@ model Post {
   ogImage         String?       @map("og_image")
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
+  views           PostView[]
 
   @@unique([locale, slug])
   @@index([status, locale, publishedAt])
   @@map("posts")
+}
+
+model PostView {
+  id        String   @id @default(uuid())
+  postId    String   @map("post_id")
+  viewerKey String   @map("viewer_key")
+  viewedAt  DateTime @default(now()) @map("viewed_at")
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId, viewerKey, viewedAt])
+  @@map("post_views")
 }
 
 model Solution {
@@ -110,19 +123,34 @@ model Solution {
 }
 
 model Product {
-  id              String          @id @default(uuid())
-  locale          Locale
-  slug            String
-  name            String
-  description     String          @db.Text
-  category        ProductCategory
-  linkPath        String?         @map("link_path")
-  sortOrder       Int             @default(0) @map("sort_order")
-  status          PublishStatus   @default(draft)
-  seoTitle        String?         @map("seo_title")
-  seoDescription  String?         @map("seo_description") @db.Text
-  createdAt       DateTime        @default(now()) @map("created_at")
-  updatedAt       DateTime        @updatedAt @map("updated_at")
+  id                String          @id @default(uuid())
+  locale            Locale
+  slug              String
+  name              String
+  description       String          @db.Text
+  tagline           String?         @db.Text
+  intro             String?         @db.Text
+  category          ProductCategory
+  icon              String          @default("Boxes")
+  heroImage         String?         @map("hero_image")
+  images            Json            @default("[]")
+  features          Json            @default("[]")
+  specs             Json            @default("[]")
+  useCases          Json            @default("[]") @map("use_cases")
+  highlights        Json            @default("[]")
+  body              String          @default("") @db.Text
+  hasDetailPage     Boolean         @default(false) @map("has_detail_page")
+  ctaUrl            String?         @map("cta_url")
+  ctaLabel          String?         @map("cta_label")
+  secondaryCtaUrl   String?         @map("secondary_cta_url")
+  secondaryCtaLabel String?         @map("secondary_cta_label")
+  sortOrder         Int             @default(0) @map("sort_order")
+  status            PublishStatus   @default(draft)
+  seoTitle          String?         @map("seo_title")
+  seoDescription    String?         @map("seo_description") @db.Text
+  ogImage           String?         @map("og_image")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
 
   @@unique([locale, slug])
   @@index([status, locale, category, sortOrder])
@@ -151,6 +179,7 @@ model DownloadItem {
   fileSize  String?       @map("file_size")
   sortOrder Int           @default(0) @map("sort_order")
   status    PublishStatus @default(draft)
+  downloadCount Int       @default(0) @map("download_count")
   createdAt DateTime      @default(now()) @map("created_at")
   updatedAt DateTime      @updatedAt @map("updated_at")
   group     DownloadGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)

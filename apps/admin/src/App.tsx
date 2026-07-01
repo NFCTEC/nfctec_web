@@ -15,6 +15,7 @@ import { DownloadsPage } from './pages/downloads/DownloadsPage';
 import { MediaPage } from './pages/media/MediaPage';
 import { InquiriesPage } from './pages/inquiries/InquiriesPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
+import { SiteDisplayPage } from './pages/settings/SiteDisplayPage';
 import { UsersPage } from './pages/users/UsersPage';
 
 export default function App() {
@@ -44,6 +45,7 @@ export default function App() {
                 <Route path="media" element={<MediaPage />} />
                 <Route path="inquiries" element={<InquiriesPage />} />
                 <Route path="settings" element={<SettingsPage />} />
+                <Route path="site-display" element={<SiteDisplayPage />} />
                 <Route path="users" element={<UsersPage />} />
               </Route>
             </Route>

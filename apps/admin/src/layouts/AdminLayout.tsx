@@ -25,6 +25,7 @@ const items = [
   { key: '/media', icon: <PictureOutlined />, label: <Link to="/media">Media</Link> },
   { key: '/inquiries', icon: <MailOutlined />, label: <Link to="/inquiries">Inquiries</Link> },
   { key: '/settings', icon: <SettingOutlined />, label: <Link to="/settings">Site Settings</Link> },
+  { key: '/site-display', icon: <SettingOutlined />, label: <Link to="/site-display">Site Display</Link> },
   { key: '/users', icon: <UserOutlined />, label: <Link to="/users">Admin Users</Link> },
 ];
 

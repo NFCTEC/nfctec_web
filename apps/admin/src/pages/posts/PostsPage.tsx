@@ -53,6 +53,7 @@ export function PostsPage() {
           { title: 'Title', dataIndex: 'title' },
           { title: 'Slug', dataIndex: 'slug' },
           { title: 'Locale', dataIndex: 'locale', width: 80 },
+          { title: 'Views', dataIndex: 'viewCount', width: 80 },
           {
             title: 'Status',
             dataIndex: 'status',

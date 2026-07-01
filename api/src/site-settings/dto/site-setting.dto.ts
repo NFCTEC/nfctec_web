@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { Allow, IsEnum, IsOptional, IsString } from 'class-validator';
 import { Locale } from '@prisma/client';
 
 export class UpsertSiteSettingDto {
@@ -9,5 +9,6 @@ export class UpsertSiteSettingDto {
   @IsOptional()
   locale?: Locale | null;
 
+  @Allow()
   value: unknown;
 }
