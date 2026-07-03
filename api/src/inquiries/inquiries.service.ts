@@ -1,11 +1,27 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InquiryStatus } from '@prisma/client';
+import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateInquiryDto } from '../public/dto/create-inquiry.dto';
 import { UpdateInquiryDto } from './dto/inquiry.dto';
 
 @Injectable()
 export class InquiriesService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(InquiriesService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private mail: MailService,
+  ) {}
+
+  async createFromWebsite(dto: CreateInquiryDto) {
+    const inquiry = await this.prisma.inquiry.create({ data: dto });
+    const sent = await this.mail.sendInquiryNotification(dto);
+    if (!sent) {
+      this.logger.warn(`Inquiry ${inquiry.id} saved but notification email was not sent`);
+    }
+    return inquiry;
+  }
 
   findAllAdmin(status?: InquiryStatus) {
     return this.prisma.inquiry.findMany({

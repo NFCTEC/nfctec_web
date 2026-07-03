@@ -5,6 +5,7 @@ import { SolutionsModule } from '../solutions/solutions.module';
 import { ProductsModule } from '../products/products.module';
 import { DownloadsModule } from '../downloads/downloads.module';
 import { SiteSettingsModule } from '../site-settings/site-settings.module';
+import { InquiriesModule } from '../inquiries/inquiries.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { SiteSettingsModule } from '../site-settings/site-settings.module';
     ProductsModule,
     DownloadsModule,
     SiteSettingsModule,
+    InquiriesModule,
   ],
   controllers: [PublicController],
 })

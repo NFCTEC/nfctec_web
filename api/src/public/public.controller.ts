@@ -10,6 +10,7 @@ import { SolutionsService } from '../solutions/solutions.service';
 import { ProductsService } from '../products/products.service';
 import { DownloadsService } from '../downloads/downloads.service';
 import { SiteSettingsService } from '../site-settings/site-settings.service';
+import { InquiriesService } from '../inquiries/inquiries.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInquiryDto } from './dto/create-inquiry.dto';
 import { RecordPostViewDto } from './dto/record-post-view.dto';
@@ -25,6 +26,7 @@ export class PublicController {
     private downloads: DownloadsService,
     private settings: SiteSettingsService,
     private prisma: PrismaService,
+    private inquiries: InquiriesService,
     private config: ConfigService,
   ) {}
 
@@ -189,6 +191,6 @@ export class PublicController {
 
   @Post('inquiries')
   createInquiry(@Body() dto: CreateInquiryDto) {
-    return this.prisma.inquiry.create({ data: dto });
+    return this.inquiries.createFromWebsite(dto);
   }
 }
